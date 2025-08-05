@@ -1,5 +1,5 @@
 #!/bin/bash
-API_URL="http://localhost:5001"
+API_URL="http://localhost:5000"
 
 # Check API availability
 curl -sf "$API_URL/health" > /dev/null || { echo "API not accessible at $API_URL"; exit 1; }

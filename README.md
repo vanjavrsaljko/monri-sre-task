@@ -21,7 +21,7 @@ Python Flask API with Prometheus metrics monitored by Grafana dashboards.
 
 ```bash
 # Download and execute the app VM setup script
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/monri-sre-task/main/scripts/setup-app-vm.sh | bash
+curl -fsSL https://raw.githubusercontent.com/vanjavrsaljko/monri-sre-task/main/scripts/setup-app-vm.sh | bash
 ```
 
 This script will:
@@ -33,14 +33,17 @@ This script will:
 ### Monitoring VM Setup
 
 ```bash
-# Download and execute the monitoring VM setup script
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/monri-sre-task/main/scripts/setup-monitoring-vm.sh | bash
+# Get the App VM IP address first, then run:
+curl -fsSL https://raw.githubusercontent.com/vanjavrsaljko/monri-sre-task/main/scripts/setup-monitoring-vm.sh | bash -s <APP_VM_IP>
+
+# Example:
+curl -fsSL https://raw.githubusercontent.com/vanjavrsaljko/monri-sre-task/main/scripts/setup-monitoring-vm.sh | bash -s 10.0.1.100
 ```
 
 This script will:
 - Install Docker and Docker Compose
 - Clone the repository
-- Configure Prometheus to scrape the application VM
+- Configure Prometheus to scrape the application VM at the provided IP
 - Start Prometheus and Grafana services
 - Verify services are running on ports 9090 and 3000
 
@@ -56,12 +59,48 @@ This script will:
 2. **payment_processing_duration_seconds** (Histogram) - Response times
 3. **active_transactions_gauge** (Gauge) - Active transactions
 
-## Alerts
+## Alerts (Grafana Unified Alerting)
 
-- **HighErrorRate**: >5% errors over 5min
-- **SlowResponseTime**: 95th percentile >2s over 5min
-- **ApplicationDown**: Service unavailable >1min
-- **HighActiveTransactions**: >100 active >2min
+Grafana unified alerting is enabled. Set up the following alert rules manually via the UI:
+
+### Recommended Alert Rules:
+
+1. **High Error Rate**
+   - Query: `(rate(payment_requests_total{status="error"}[5m]) / rate(payment_requests_total[5m])) * 100`
+   - Condition: `> 5`
+   - Evaluation: Every 1m for 5m
+   - Severity: Warning
+
+2. **Slow Response Time**
+   - Query: `histogram_quantile(0.95, rate(payment_processing_duration_seconds_bucket[5m]))`
+   - Condition: `> 2`
+   - Evaluation: Every 1m for 5m
+   - Severity: Warning
+
+3. **Application Down**
+   - Query: `up{job="payment-api"}`
+   - Condition: `< 1`
+   - Evaluation: Every 1m for 1m
+   - Severity: Critical
+
+4. **High Active Transactions**
+   - Query: `active_transactions_gauge`
+   - Condition: `> 100`
+   - Evaluation: Every 1m for 2m
+   - Severity: Warning
+
+### Setup Instructions:
+1. Go to: http://monitoring-vm-ip:3000/alerting
+2. Click "New rule" to create each alert
+3. Configure contact points for notifications (email, Slack, etc.)
+4. Test alerts by running the traffic generator script
+
+**Note:** If you see alert provisioning errors in Grafana logs, reset Grafana data:
+```bash
+sudo docker-compose down
+sudo docker volume rm monri-monitoring_grafana_data
+sudo docker-compose up -d
+```
 
 ## API Endpoints
 
@@ -74,7 +113,8 @@ This script will:
 ## Traffic Generator
 
 ```bash
-./scripts/generate-traffic.sh
+# Download and execute the traffic generator script
+curl -fsSL https://raw.githubusercontent.com/vanjavrsaljko/monri-sre-task/main/scripts/generate-traffic.sh | bash
 ```
 
 Generates realistic API traffic for dashboard testing:

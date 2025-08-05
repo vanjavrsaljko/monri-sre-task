@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO_URL="https://github.com/YOUR_USERNAME/monri-sre-task.git"
+REPO_URL="https://github.com/vanjavrsaljko/monri-sre-task.git"
 WORK_DIR="/tmp/monri-app-setup"
 APP_DIR="/opt/monri-payment-api"
 CONTAINER_NAME="monri-payment-api"
@@ -17,7 +17,7 @@ curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 sudo systemctl enable --now docker
 
-# Deploy app
+# Deploy application
 mkdir -p "$WORK_DIR" && cd "$WORK_DIR"
 git clone "$REPO_URL" .
 sudo mkdir -p "$APP_DIR"

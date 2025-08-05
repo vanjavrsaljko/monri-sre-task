@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO_URL="https://github.com/YOUR_USERNAME/monri-sre-task.git"
+REPO_URL="https://github.com/vanjavrsaljko/monri-sre-task.git"
 WORK_DIR="/tmp/monri-sre-setup"
 MONITORING_DIR="/opt/monri-monitoring"
 
@@ -25,13 +25,20 @@ sudo chown $USER:$USER "$MONITORING_DIR"
 cp -r monitoring/* "$MONITORING_DIR/"
 
 # Configure app IP
-read -p "App VM IP: " APP_VM_IP
-[[ -n "$APP_VM_IP" ]] && sed -i "s/APPLICATION_VM_IP/$APP_VM_IP/g" "$MONITORING_DIR/prometheus/prometheus.yml"
+APP_VM_IP="$1"
+if [[ -z "$APP_VM_IP" ]]; then
+    echo "Please provide the App VM IP address:"
+    echo "Usage: $0 <APP_VM_IP>"
+    echo "Or run: curl -fsSL <script-url> | bash -s <APP_VM_IP>"
+    exit 1
+fi
+echo "Configuring Prometheus to scrape App VM at: $APP_VM_IP"
+sed -i "s/APPLICATION_VM_IP/$APP_VM_IP/g" "$MONITORING_DIR/prometheus/prometheus.yml"
 
 # Start services
 cd "$MONITORING_DIR"
 sudo docker-compose up -d
-sleep 20
+sleep 30
 
 # Verify
 curl -sf http://localhost:9090/-/healthy > /dev/null && curl -sf http://localhost:3000/api/health > /dev/null && \
