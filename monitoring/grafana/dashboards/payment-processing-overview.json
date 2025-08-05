@@ -95,7 +95,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (method, status) (increase(payment_requests_total[$__range]))",
+          "expr": "round(sum by (method, status) (increase(payment_requests_total[$__range])))",
           "legendFormat": "{{method}} - {{status}}",
           "refId": "A"
         }

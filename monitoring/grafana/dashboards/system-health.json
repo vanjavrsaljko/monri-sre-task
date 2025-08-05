@@ -91,7 +91,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(payment_requests_total[$__range]))",
+          "expr": "round(sum(increase(payment_requests_total[$__range])))",
           "legendFormat": "Total Requests",
           "refId": "A"
         }
@@ -121,7 +121,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(payment_requests_total{status=\"success\"}[$__range]))",
+          "expr": "round(sum(increase(payment_requests_total{status=\"success\"}[$__range])))",
           "legendFormat": "Successful Requests",
           "refId": "A"
         }
@@ -151,7 +151,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(payment_requests_total{status=\"error\"}[$__range]))",
+          "expr": "round(sum(increase(payment_requests_total{status=\"error\"}[$__range])))",
           "legendFormat": "Failed Requests",
           "refId": "A"
         }
