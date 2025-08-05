@@ -66,41 +66,39 @@ Grafana unified alerting is enabled. Set up the following alert rules manually v
 ### Recommended Alert Rules:
 
 1. **High Error Rate**
-   - Query: `(rate(payment_requests_total{status="error"}[5m]) / rate(payment_requests_total[5m])) * 100`
-   - Condition: `> 5`
+   - Query A: `(rate(payment_requests_total{status="error"}[5m]) / rate(payment_requests_total[5m])) * 100`
+   - Condition B: `$A > 5`
    - Evaluation: Every 1m for 5m
    - Severity: Warning
 
 2. **Slow Response Time**
-   - Query: `histogram_quantile(0.95, rate(payment_processing_duration_seconds_bucket[5m]))`
-   - Condition: `> 2`
+   - Query A: `histogram_quantile(0.95, rate(payment_processing_duration_seconds_bucket[5m]))`
+   - Condition B: `$A > 2`
    - Evaluation: Every 1m for 5m
    - Severity: Warning
 
 3. **Application Down**
-   - Query: `up{job="payment-api"}`
-   - Condition: `< 1`
+   - Query A: `up{job="payment-api"}`
+   - Condition B: `$A < 1`
    - Evaluation: Every 1m for 1m
    - Severity: Critical
 
 4. **High Active Transactions**
-   - Query: `active_transactions_gauge`
-   - Condition: `> 100`
+   - Query A: `active_transactions_gauge`
+   - Condition B: `$A > 100`
    - Evaluation: Every 1m for 2m
    - Severity: Warning
 
 ### Setup Instructions:
 1. Go to: http://monitoring-vm-ip:3000/alerting
 2. Click "New rule" to create each alert
-3. Configure contact points for notifications (email, Slack, etc.)
-4. Test alerts by running the traffic generator script
-
-**Note:** If you see alert provisioning errors in Grafana logs, reset Grafana data:
-```bash
-sudo docker-compose down
-sudo docker volume rm monri-monitoring_grafana_data
-sudo docker-compose up -d
-```
+3. **Add Query A**: Enter the Prometheus query
+4. **Add Expression B**: Set condition (e.g., `$A > 5`)
+5. **Set Labels**: Add `severity=warning` or `severity=critical` in the Labels section
+6. **Configure evaluation**: Set evaluation interval and "for" duration
+7. **Add annotations**: Summary and description for alert details
+8. Configure contact points for notifications (email, Slack, etc.)
+9. Test alerts by running the traffic generator script
 
 ## API Endpoints
 
