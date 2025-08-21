@@ -37,6 +37,7 @@ sed -i "s/APPLICATION_VM_IP/$APP_VM_IP/g" "$MONITORING_DIR/prometheus/prometheus
 
 # Start services
 cd "$MONITORING_DIR"
+sudo docker-compose down
 sudo docker-compose up -d
 sleep 30
 
